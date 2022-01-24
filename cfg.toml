@@ -1,0 +1,74 @@
+[min_versions]
+robotpy-build = "2022.2.0"
+
+robotpy-wpiutil             = "2022.2.1.1"
+pyntcore                    = "2022.2.1.1"
+robotpy-hal                 = "2022.2.1.1"
+robotpy-wpimath             = "2022.2.1.2"
+wpilib                      = "2022.2.1.3"
+robotpy-halsim-gui          = "2022.2.1.0"
+robotpy-halsim-ds-socket    = "2022.2.1.0"
+robotpy-halsim-ws           = "2022.2.1.0"
+
+[versions]
+robotpy-wpiutil             = "2022.2.1.1"
+pyntcore                    = "2022.2.1.1"
+robotpy-hal                 = "2022.2.1.1"
+robotpy-wpimath             = "2022.2.1.2"
+wpilib                      = "2022.2.1.3"
+robotpy-halsim-gui          = "2022.2.1.0"
+robotpy-halsim-ds-socket    = "2022.2.1.0"
+robotpy-halsim-ws           = "2022.2.1.0"
+robotpy-commands-v1         = "2022.2.1.1"
+robotpy-commands-v2         = "2022.2.1.1"
+
+robotpy-navx                = "2022.0.1"
+robotpy-ctre                = "2022.0.5"
+robotpy-playingwithfusion   = "2022.0.4"
+robotpy-rev                 = "2022.0.1"
+robotpy-romi                = "2022.1.1.1"
+robotpy-photonvision        = "2022.0.3"
+
+[params]
+max_version = "2023.0.0"
+wpilib_version = "2022.2.1"
+wpilib_packages = [
+    "robotpy-wpiutil",
+    "pyntcore",
+    "robotpy-hal",
+    "robotpy-wpimath",
+    "wpilib",
+    "robotpy-halsim-gui",
+    "robotpy-halsim-ds-socket",
+    "robotpy-halsim-ws",
+    "robotpy-commands-v1",
+    "robotpy-commands-v2",
+]
+
+vendor_packages = [
+    "robotpy-navx",
+    "robotpy-rev",
+    "robotpy-ctre",
+    "robotpy-playingwithfusion",
+    "robotpy-photonvision",
+    "robotpy-romi",
+]
+
+repos = [
+    "https://github.com/robotpy/robotpy-wpiutil",
+    "https://github.com/robotpy/pyntcore",
+    "https://github.com/robotpy/robotpy-hal",
+    "https://github.com/robotpy/robotpy-wpimath",
+    "https://github.com/robotpy/robotpy-wpilib",
+    "https://github.com/robotpy/robotpy-halsim-gui",
+    "https://github.com/robotpy/robotpy-halsim-ds-socket",
+    "https://github.com/robotpy/robotpy-halsim-ws",
+    "https://github.com/robotpy/robotpy-commands-v2",
+    "https://github.com/robotpy/robotpy-romi",
+    "https://github.com/robotpy/robotpy-navx",
+    "https://github.com/robotpy/robotpy-ctre",
+    "https://github.com/robotpy/robotpy-rev",
+    "https://github.com/robotpy/robotpy-playingwithfusion",
+    "https://github.com/robotpy/robotpy-photonvision",
+    "https://github.com/robotpy/robotpy-commands-v1",
+]
