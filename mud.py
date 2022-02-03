@@ -3,6 +3,7 @@
 import datetime
 import pathlib
 import subprocess
+import sys
 import typing
 
 from packaging.version import Version
@@ -82,12 +83,17 @@ def clone(mud: MassUpdateData):
 @repo.command()
 @click.pass_obj
 def ensure(mud: MassUpdateData):
-    """Ensures repos are on main branch, updated, and clean"""
+    """Ensures repos are on main branch, updated, and clean, and pass black formatting"""
 
     for repo in mud.repo_dirs():
         print(f"{repo.path.name}:")
         repo.checkout_branch("main")
         repo.pull()
+
+        subprocess.run(
+            [sys.executable, "-m", "black", "--check", "--diff", "."], cwd=repo.path
+        )
+
         print()
 
 
