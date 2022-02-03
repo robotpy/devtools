@@ -191,7 +191,7 @@ def wait_for_pypi_version(pkgname: str, version: str):
         print("... ", status_code)
         if ok:
             # give pypi a minute to sync otherwise the next job will fail
-            time.sleep(60)
+            time.sleep(90)
             break
 
         time.sleep(sleeptime)
