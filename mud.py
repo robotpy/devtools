@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import difflib
 import pathlib
 import subprocess
 import sys
@@ -22,6 +23,12 @@ root = pathlib.Path(__file__).parent
 repodir = root / "repos"
 
 
+def print_diff(fname: pathlib.Path, src: str, dst: str):
+    print(fname)
+    for line in difflib.unified_diff(src.splitlines(), dst.splitlines()):
+        print(line)
+
+
 class IterMeta(typing.NamedTuple):
     repo: githelp.GitRepo
     name: str
@@ -31,7 +38,8 @@ class IterMeta(typing.NamedTuple):
 
 class MassUpdateData:
     def __init__(self) -> None:
-        self.cfg, self.rawcfg = config.load(root / "cfg.toml")
+        self.cfgpath = root / "cfg.toml"
+        self.cfg, self.rawcfg = config.load(self.cfgpath)
         self.pyupdater = update_pyproject.ProjectUpdater(self.cfg)
 
     def get_repo_path(self, repo_url: str) -> pathlib.Path:
@@ -139,23 +147,34 @@ def reset_origin(mud: MassUpdateData, project: str):
             meta.repo.reset_origin("main")
 
 
-# @version.command()
-# @click.option("--doit", default=False)
-# @click.pass_obj
-# def updatecfg(mud: MassUpdateData, doit: bool):
+@pyproject.command()
+@click.option("--doit", is_flag=True, default=False)
+@click.pass_obj
+def updatecfg(mud: MassUpdateData, doit: bool):
+    """
+    Update cfg.toml with current versions in git
+    """
 
-#     changed = False
-#     rawcfg = mud.rawcfg
+    changed = False
+    rawcfg = mud.rawcfg
 
-#     for (repo, name, actual_version, desired_version) in mud.iter_repos_meta():
-#         if actual_version != desired_version:
-#             rawcfg["versions"][name] = actual_version
-#             changed = True
+    for (repo, name, actual_version, desired_version) in mud.iter_repos_meta():
+        if actual_version != desired_version:
+            print(f"{name:20}: {desired_version} -> {actual_version}")
+            rawcfg["versions"][name] = actual_version
+            changed = True
 
-#     if doit and changed:
-#         pass
-#     elif changed:
-#         print(tomlkit.dumps(rawcfg))
+    if doit and changed:
+        with open(mud.cfgpath, "w") as fp:
+            fp.write(tomlkit.dumps(rawcfg))
+    elif changed:
+        pass  # TODO
+        # new = tomlkit.dumps(rawcfg)
+        # with open(mud.cfgpath) as fp:
+        #     orig = fp.read()
+
+        # print(new)
+        # # print_diff(mud.cfgpath, orig, new)
 
 
 # select the package set we're going to update

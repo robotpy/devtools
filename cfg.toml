@@ -1,39 +1,40 @@
 [min_versions]
-robotpy-build = "2022.2.0"
+robotpy-build = "2023.0.0b14"
 
-robotpy-wpiutil             = "2022.3.1.0"
-pyntcore                    = "2022.3.1.0"
-robotpy-hal                 = "2022.3.1.0"
-robotpy-wpimath             = "2022.3.1.0"
-wpilib                      = "2022.3.1.0"
-robotpy-halsim-gui          = "2022.3.1.0"
-robotpy-halsim-ds-socket    = "2022.3.1.0"
-robotpy-halsim-ws           = "2022.3.1.0"
+robotpy-wpiutil             = "2023.0.0b4"
+pyntcore                    = "2023.0.0b4"
+robotpy-hal                 = "2023.0.0b4"
+robotpy-wpimath             = "2023.0.0b4"
+wpilib                      = "2023.0.0b4"
+robotpy-halsim-gui          = "2023.0.0b4"
+robotpy-halsim-ds-socket    = "2023.0.0b4"
+robotpy-halsim-ws           = "2023.0.0b4"
 
 [versions]
-robotpy-wpiutil             = "2022.3.1.0"
-pyntcore                    = "2022.3.1.0"
-robotpy-hal                 = "2022.3.1.0"
-robotpy-wpimath             = "2022.3.1.0"
-wpilib                      = "2022.3.1.0"
-robotpy-halsim-gui          = "2022.3.1.0"
-robotpy-halsim-ds-socket    = "2022.3.1.0"
-robotpy-halsim-ws           = "2022.3.1.0"
-robotpy-commands-v1         = "2022.3.1.0"
-robotpy-commands-v2         = "2022.3.1.0"
+robotpy-wpiutil             = "2023.0.0b4"
+robotpy-wpinet              = "2023.0.0b4"
+pyntcore                    = "2023.0.0b4"
+robotpy-hal                 = "2023.0.0b4"
+robotpy-wpimath             = "2023.0.0b4"
+wpilib                      = "2023.0.0b4"
+robotpy-halsim-gui          = "2023.0.0b4"
+robotpy-halsim-ds-socket    = "2023.0.0b4"
+robotpy-halsim-ws           = "2023.0.0b4"
+robotpy-commands-v2         = "2023.0.0b4"
 
-robotpy-navx                = "2022.0.1"
-robotpy-ctre                = "2022.0.5"
+robotpy-navx                = "2022.0.2"
+robotpy-ctre                = "2022.1.0"
 robotpy-playingwithfusion   = "2022.0.4"
 robotpy-rev                 = "2022.0.1"
-robotpy-romi                = "2022.1.1.1"
+robotpy-romi                = "2022.2.1.0"
 robotpy-photonvision        = "2022.0.3"
 
 [params]
-max_version = "2023.0.0"
-wpilib_version = "2022.3.1"
+max_version = "2024.0.0"
+wpilib_version = "2023.1.1-beta-4"
 wpilib_packages = [
     "robotpy-wpiutil",
+    "robotpy-wpinet",
     "pyntcore",
     "robotpy-hal",
     "robotpy-wpimath",
@@ -41,7 +42,6 @@ wpilib_packages = [
     "robotpy-halsim-gui",
     "robotpy-halsim-ds-socket",
     "robotpy-halsim-ws",
-    "robotpy-commands-v1",
     "robotpy-commands-v2",
 ]
 
@@ -56,6 +56,7 @@ vendor_packages = [
 
 repos = [
     "https://github.com/robotpy/robotpy-wpiutil",
+    "https://github.com/robotpy/robotpy-wpinet",
     "https://github.com/robotpy/pyntcore",
     "https://github.com/robotpy/robotpy-hal",
     "https://github.com/robotpy/robotpy-wpimath",
@@ -70,5 +71,4 @@ repos = [
     "https://github.com/robotpy/robotpy-rev",
     "https://github.com/robotpy/robotpy-playingwithfusion",
     "https://github.com/robotpy/robotpy-photonvision",
-    "https://github.com/robotpy/robotpy-commands-v1",
 ]
