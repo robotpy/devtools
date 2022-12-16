@@ -13,8 +13,9 @@ class Parameters(Model):
     max_version: str
 
     #: any package in 'wpilib_packages' will have their maven downloads
-    #: updated to this version
-    wpilib_version: str
+    #: updated to this version / URL
+    wpilib_bin_version: str
+    wpilib_bin_url: str
     wpilib_packages: typing.List[str]
     vendor_packages: typing.List[str]
 

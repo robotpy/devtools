@@ -124,8 +124,9 @@ def pyproject():
 
 @pyproject.command()
 @click.option("--commit", is_flag=True, default=False)
+@click.option("--until", default=None)
 @click.pass_obj
-def update(mud: MassUpdateData, commit: bool):
+def update(mud: MassUpdateData, commit: bool, until: typing.Optional[str]):
     """Updates pyproject.toml from the configuration"""
     if not commit:
         mud.pyupdater.dry_run = True
@@ -134,6 +135,8 @@ def update(mud: MassUpdateData, commit: bool):
         mud.pyupdater.git_commit = True
 
     for repo in mud.repo_dirs():
+        if repo.path.name == until:
+            break
         mud.pyupdater.update_pyproject_toml(repo.path / "pyproject.toml")
         print()
 
@@ -201,8 +204,14 @@ def updatecfg(mud: MassUpdateData, doit: bool):
 
 def does_pypi_release_exist(pkgname: str, version: str):
     url = f"https://pypi.org/pypi/{pkgname}/{version}/json"
-    req = requests.head(url)
-    return req.status_code == 200, req.status_code
+    # req = requests.head(url)
+    req = requests.get(url)
+    if req.status_code != 200:
+        return False, req.status_code, 0
+
+    data = req.json()
+    release_count = len(data["urls"])
+    return release_count >= 15, req.status_code, release_count
 
 
 def wait_for_pypi_version(pkgname: str, version: str):
@@ -212,11 +221,14 @@ def wait_for_pypi_version(pkgname: str, version: str):
     while True:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{now}: checking {url}...")
-        ok, status_code = does_pypi_release_exist(pkgname, version)
-        print("... ", status_code)
+        ok, status_code, releases = does_pypi_release_exist(pkgname, version)
+        if releases:
+            print(f"... {status_code} ({releases} releases)")
+        else:
+            print("... ", status_code)
         if ok:
             # give pypi a minute to sync otherwise the next job will fail
-            time.sleep(90)
+            time.sleep(60 * 5)
             break
 
         time.sleep(sleeptime)
@@ -226,8 +238,9 @@ def wait_for_pypi_version(pkgname: str, version: str):
 
 @main.command()
 @click.option("--doit", is_flag=True, default=False)
+@click.option("--until", default=None)
 @click.pass_obj
-def autopush(mud: MassUpdateData, doit: bool):
+def autopush(mud: MassUpdateData, doit: bool, until: typing.Optional[str]):
     """
     Publish each repo that has outstanding changes.
 
@@ -239,8 +252,11 @@ def autopush(mud: MassUpdateData, doit: bool):
 
     # sanity checks first
     for meta in mud.iter_repos_meta():
+        if meta.repo.path.name == until:
+            break
+
         if meta.actual_version == meta.desired_version:
-            ok, _ = does_pypi_release_exist(meta.name, meta.desired_version)
+            ok, _, _ = does_pypi_release_exist(meta.name, meta.desired_version)
             if ok:
                 continue
 
@@ -294,7 +310,7 @@ def autopush(mud: MassUpdateData, doit: bool):
         meta.repo.push()
         meta.repo.push_tag(meta.desired_version)
 
-        ok, _ = does_pypi_release_exist(meta.name, meta.desired_version)
+        ok, _, _ = does_pypi_release_exist(meta.name, meta.desired_version)
         if not ok:
             wait_for_pypi_version(meta.name, meta.desired_version)
 

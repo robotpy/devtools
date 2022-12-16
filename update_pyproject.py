@@ -38,8 +38,12 @@ class ProjectUpdater:
             v = Version(v)
 
     @property
-    def wpilib_version(self) -> str:
-        return self.cfg.params.wpilib_version
+    def wpilib_bin_version(self) -> str:
+        return self.cfg.params.wpilib_bin_version
+
+    @property
+    def wpilib_bin_url(self) -> str:
+        return self.cfg.params.wpilib_bin_url
 
     def _update_req_version(
         self,
@@ -144,17 +148,34 @@ class ProjectUpdater:
         if pypi_name in self.cfg.params.wpilib_packages:
             for pkg, wrapper in data["tool"]["robotpy-build"]["wrappers"].items():
                 if "maven_lib_download" in wrapper:
-                    if wrapper["maven_lib_download"]["version"] != self.wpilib_version:
+                    if wrapper["maven_lib_download"]["repo_url"] != self.wpilib_bin_url:
+                        print(
+                            "* ",
+                            pkg,
+                            "repo url:",
+                            wrapper["maven_lib_download"]["repo_url"],
+                            "->",
+                            self.wpilib_bin_url,
+                        )
+                        commit_changes.add(f"repo updated to {self.wpilib_bin_url}")
+                        wrapper["maven_lib_download"]["repo_url"] = self.wpilib_bin_url
+
+                    if (
+                        wrapper["maven_lib_download"]["version"]
+                        != self.wpilib_bin_version
+                    ):
                         print(
                             "* ",
                             pkg,
                             "so version:",
                             wrapper["maven_lib_download"]["version"],
                             "->",
-                            self.wpilib_version,
+                            self.wpilib_bin_version,
                         )
-                        commit_changes.add(f"lib updated to {self.wpilib_version}")
-                        wrapper["maven_lib_download"]["version"] = self.wpilib_version
+                        commit_changes.add(f"lib updated to {self.wpilib_bin_version}")
+                        wrapper["maven_lib_download"][
+                            "version"
+                        ] = self.wpilib_bin_version
 
         if not commit_changes:
             print("* no changes needed")
