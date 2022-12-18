@@ -117,6 +117,8 @@ def make_wrapper(
     sim_deps: typing.List[str],
     athena_pkgs: typing.List[str],
     sim_pkgs: typing.List[str],
+    wpilib_pkgs: typing.List[str],
+    internals,
 ):
     if athena_plat and not sim_plat:
         athena_pkgs.append(name)
@@ -143,6 +145,13 @@ def make_wrapper(
         athena_pkgs.append(name)
         sim_pkgs.append(name)
 
+    for deps in (athena_deps, sim_deps):
+        if not deps:
+            continue
+        for dep in deps:
+            if dep not in internals and dep not in wpilib_pkgs:
+                wpilib_pkgs.append(dep)
+
 
 root = pathlib.Path(__file__).parent.absolute()
 cache = root / "vendorcache"
@@ -162,6 +171,7 @@ def main():
 
     our_libs: typing.Dict[str, LibData] = {}
     internals = {}
+    internals_set = set()
 
     for dep in data["cppDependencies"]:
         # construct the URL
@@ -185,6 +195,7 @@ def main():
         )
 
         our_libs[pkgname] = ld
+        internals_set.add(pkgname)
 
         # validate the pieces
         for piece in (ld.artifact_id, ld.group_id, ld.version):
@@ -236,6 +247,7 @@ def main():
     wrappers = {}
     t = {"tool": {"robotpy-build": {"wrappers": wrappers}}}
 
+    wpilib_pkgs = []
     athena_pkgs = []
     sim_pkgs = []
 
@@ -262,6 +274,8 @@ def main():
             sim_deps,
             athena_pkgs,
             sim_pkgs,
+            wpilib_pkgs,
+            internals_set,
         )
 
         wrapper["maven_lib_download"] = {
@@ -276,6 +290,11 @@ def main():
     wrapper = dict(name=args.package)
     wrappers[args.package] = wrapper
 
+    if athena_pkgs:
+        athena_pkgs = wpilib_pkgs + athena_pkgs
+    if sim_pkgs:
+        sim_pkgs = wpilib_pkgs + sim_pkgs
+
     make_wrapper(
         wrapper,
         args.package,
@@ -285,6 +304,8 @@ def main():
         sim_pkgs,
         [],
         [],
+        [],
+        internals_set,
     )
 
     print("#")
