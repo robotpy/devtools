@@ -1,4 +1,5 @@
 /repos
+/vendorcache
 *.py[cod]
 .mypy_cache
 .vscode
