@@ -6,6 +6,7 @@
 import argparse
 import dataclasses
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -163,8 +164,13 @@ def main():
     parser.add_argument("package")
     args = parser.parse_args()
 
-    with open(args.vendor_json) as fp:
-        data = json.load(fp)
+    try:
+        with open(args.vendor_json) as fp:
+            data = json.load(fp)
+    except:
+        from urllib.request import urlopen
+        with urlopen(args.vendor_json) as fp:
+            data = json.load(fp)
 
     maven_url = data["mavenUrls"][0].rstrip("/")
     # .. version doesn't matter
@@ -318,7 +324,10 @@ def main():
     for name, data in our_libs.items():
         d = data.pypkg.split(".")[-1]
         print("mkdir", d, file=sys.stderr)
-        print("touch", d + "/__init__.py", file=sys.stderr)
+        if os.name == "nt":
+            print("New-Item", d + "/__init__.py", file=sys.stderr)
+        else:
+            print("touch", d + "/__init__.py", file=sys.stderr)
         print("git add -f", d + "/__init__.py", file=sys.stderr)
 
 
