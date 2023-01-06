@@ -105,6 +105,17 @@ def ensure(mud: MassUpdateData):
         print()
 
 
+@repo.command()
+@click.argument("repo_name")
+@click.pass_obj
+def pull_local(mud: MassUpdateData, repo_name):
+    """Pulls from the 'local' remote of specified repo"""
+    for repo in mud.repo_dirs():
+        if repo.path.name == repo_name:
+            subprocess.run(["git", "pull", "local", "main", "--ff-only"], cwd=repo.path)
+            break
+
+
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @click.pass_obj
