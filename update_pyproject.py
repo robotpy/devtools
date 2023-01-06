@@ -146,8 +146,11 @@ class ProjectUpdater:
 
         # if a wpilib project, update versions in maven_lib_download
         if pypi_name in self.cfg.params.wpilib_packages:
-            for pkg, wrapper in data["tool"]["robotpy-build"]["wrappers"].items():
-                if "maven_lib_download" in wrapper:
+            iter = list(data["tool"]["robotpy-build"]["wrappers"].items())
+            if "static_libs" in data["tool"]["robotpy-build"]:
+                iter += list(data["tool"]["robotpy-build"]["static_libs"].items())
+            for pkg, wrapper in iter:
+                if "maven_lib_download" in wrapper and pkg != "opencv_cpp":
                     if wrapper["maven_lib_download"]["repo_url"] != self.wpilib_bin_url:
                         print(
                             "* ",
