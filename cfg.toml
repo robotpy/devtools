@@ -1,41 +1,57 @@
 [min_versions]
-robotpy-build = "2023.0.0b14"
+robotpy-build = "2023.0.0"
 
-robotpy-wpiutil             = "2023.0.0b4"
-pyntcore                    = "2023.0.0b4"
-robotpy-hal                 = "2023.0.0b4"
-robotpy-wpimath             = "2023.0.0b4"
-wpilib                      = "2023.0.0b4"
-robotpy-halsim-gui          = "2023.0.0b4"
-robotpy-halsim-ds-socket    = "2023.0.0b4"
-robotpy-halsim-ws           = "2023.0.0b4"
+# robotpy-wpiutil             = "actual"
+# robotpy-wpinet              = "actual"
+# pyntcore                    = "actual"
+# robotpy-hal                 = "actual"
+# robotpy-wpimath             = "actual"
+# wpilib                      = "actual"
+# robotpy-halsim-gui          = "actual"
+# robotpy-halsim-ds-socket    = "actual"
+# robotpy-halsim-ws           = "actual"
+
+robotpy-wpiutil             = "2023.1.1.0"
+robotpy-wpinet              = "2023.1.1.0"
+pyntcore                    = "2023.1.1.0"
+robotpy-hal                 = "2023.1.1.0"
+robotpy-wpimath             = "2023.1.1.0"
+wpilib                      = "2023.1.1.0"
+robotpy-halsim-gui          = "2023.1.1.0"
+robotpy-halsim-ds-socket    = "2023.1.1.0"
+robotpy-halsim-ws           = "2023.1.1.0"
+robotpy-commands-v2         = "2023.1.1.0"
+robotpy-cscore              = "2023.1.1.0"
+robotpy-apriltag            = "2023.1.1.0"
 
 [versions]
-robotpy-wpiutil             = "2023.0.0b4"
-robotpy-wpinet              = "2023.0.0b4"
-pyntcore                    = "2023.0.0b4"
-robotpy-hal                 = "2023.0.0b4"
-robotpy-wpimath             = "2023.0.0b4"
-wpilib                      = "2023.0.0b4"
-robotpy-halsim-gui          = "2023.0.0b4"
-robotpy-halsim-ds-socket    = "2023.0.0b4"
-robotpy-halsim-ws           = "2023.0.0b4"
-robotpy-commands-v2         = "2023.0.0b4"
 
-robotpy-navx                = "2022.0.2"
-robotpy-ctre                = "2022.1.0"
-robotpy-playingwithfusion   = "2022.0.4"
-robotpy-rev                 = "2022.0.1"
-robotpy-romi                = "2022.2.1.0"
-robotpy-photonvision        = "2022.0.3"
+# allwpilib-based package versioning is xxxx.x.x.y:
+# - x is the upstream version
+# - y are specific robotpy patches when we release out of band
+
+robotpy-wpiutil             = "2023.1.1.0"
+robotpy-wpinet              = "2023.1.1.0"
+pyntcore                    = "2023.1.1.0"
+robotpy-hal                 = "2023.1.1.0"
+robotpy-wpimath             = "2023.1.1.0"
+wpilib                      = "2023.1.1.0"
+robotpy-halsim-gui          = "2023.1.1.0"
+robotpy-halsim-ds-socket    = "2023.1.1.0"
+robotpy-halsim-ws           = "2023.1.1.0"
+robotpy-commands-v2         = "2023.1.1.0"
+robotpy-cscore              = "2023.1.1.0"
+robotpy-apriltag            = "2023.1.1.0"
 
 [params]
-max_version = "2024.0.0"
-wpilib_version = "2023.1.1-beta-4"
+max_version = "2024.0.0" # only used for non-wpilib packages
+
 wpilib_packages = [
     "robotpy-wpiutil",
     "robotpy-wpinet",
     "pyntcore",
+    "robotpy-cscore",
+    "robotpy-apriltag",
     "robotpy-hal",
     "robotpy-wpimath",
     "wpilib",
@@ -45,19 +61,19 @@ wpilib_packages = [
     "robotpy-commands-v2",
 ]
 
-vendor_packages = [
-    "robotpy-navx",
-    "robotpy-rev",
-    "robotpy-ctre",
-    "robotpy-playingwithfusion",
-    "robotpy-photonvision",
-    "robotpy-romi",
-]
+wpilib_bin_version = "2023.1.1"
+wpilib_bin_url =  "https://frcmaven.wpi.edu/artifactory/release"
+# wpilib_bin_url = "https://frcmaven.wpi.edu/artifactory/development"
+
+vendor_packages = []
+
 
 repos = [
     "https://github.com/robotpy/robotpy-wpiutil",
     "https://github.com/robotpy/robotpy-wpinet",
     "https://github.com/robotpy/pyntcore",
+    "https://github.com/robotpy/robotpy-apriltag",
+    "https://github.com/robotpy/robotpy-cscore",
     "https://github.com/robotpy/robotpy-hal",
     "https://github.com/robotpy/robotpy-wpimath",
     "https://github.com/robotpy/robotpy-wpilib",
@@ -65,10 +81,31 @@ repos = [
     "https://github.com/robotpy/robotpy-halsim-ds-socket",
     "https://github.com/robotpy/robotpy-halsim-ws",
     "https://github.com/robotpy/robotpy-commands-v2",
-    "https://github.com/robotpy/robotpy-romi",
-    "https://github.com/robotpy/robotpy-navx",
-    "https://github.com/robotpy/robotpy-ctre",
-    "https://github.com/robotpy/robotpy-rev",
-    "https://github.com/robotpy/robotpy-playingwithfusion",
-    "https://github.com/robotpy/robotpy-photonvision",
 ]
+
+# This isn't as useful for vendor packages since they're released at different
+# cadences? so not going to bother with it for now until I have a usecase.
+#
+# robotpy-navx                = "2022.0.2"
+# robotpy-ctre                = "2022.1.0"
+# robotpy-playingwithfusion   = "2022.0.4"
+# robotpy-rev                 = "2022.0.1"
+# robotpy-romi                = "2022.2.1.0"
+# robotpy-photonvision        = "2022.0.3"
+
+# vendor_packages = [
+#     "robotpy-navx",
+#     "robotpy-rev",
+#     "robotpy-ctre",
+#     "robotpy-playingwithfusion",
+#     "robotpy-photonvision",
+#     "robotpy-romi",
+# ]
+
+# repos =
+# "https://github.com/robotpy/robotpy-romi",
+# "https://github.com/robotpy/robotpy-navx",
+# "https://github.com/robotpy/robotpy-ctre",
+# "https://github.com/robotpy/robotpy-rev",
+# "https://github.com/robotpy/robotpy-playingwithfusion",
+# "https://github.com/robotpy/robotpy-photonvision",
