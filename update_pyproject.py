@@ -23,19 +23,44 @@ class ProjectUpdater:
         self.git_commit = True
 
         self.cfg = cfg
-        self.min_versions = {n: Version(v) for n, v in self.cfg.min_versions.items()}
+        self.min_versions = {}
         self.max_version = Version(self.cfg.params.max_version)
 
         # sanity check that min versions are never > version
-        for n, v in self.min_versions.items():
+        for n, min_v in self.cfg.min_versions.items():
             set_v = self.cfg.versions.get(n)
             if set_v is not None:
-                if v > Version(set_v):
+                set_v = Version(set_v)
+            if min_v == "actual":
+                if set_v is None:
+                    raise ValueError(f"{n}: min version is 'actual' but no set version")
+
+                min_v = set_v
+            else:
+                min_v = Version(min_v)
+
+            if set_v is not None:
+                if min_v > set_v:
                     raise ValueError(
-                        f"min version of {n} ({v}) is greater than set version {set_v}"
+                        f"min version of {n} ({min_v}) is greater than set version {set_v}"
                     )
+
+            self.min_versions[n] = min_v
+
+        self.wpilib_approx = ""
+        self.versions = {}
         for n, v in self.cfg.versions.items():
             v = Version(v)
+            # New assumption: all wpilib packages are working on the same approx version
+            approx = self._compute_wpilib_approx_version(v)
+            if self.wpilib_approx == "":
+                self.wpilib_approx = approx
+            elif approx != self.wpilib_approx:
+                raise ValueError(
+                    f"wpilib package approx version mismatch: {approx} vs {self.wpilib_approx}"
+                )
+
+            self.versions[n] = v
 
     @property
     def wpilib_bin_version(self) -> str:
@@ -45,8 +70,16 @@ class ProjectUpdater:
     def wpilib_bin_url(self) -> str:
         return self.cfg.params.wpilib_bin_url
 
+    @property
+    def wpilib_packages(self) -> typing.List[str]:
+        return self.cfg.params.wpilib_packages
+
+    def _compute_wpilib_approx_version(self, v: Version) -> str:
+        return ".".join(map(str, v.release[:3]))
+
     def _update_req_version(
         self,
+        pypi_name: str,
         commit_changes: typing.Set[str],
         display_changes: typing.List[str],
         req: Requirement,
@@ -54,38 +87,69 @@ class ProjectUpdater:
     ) -> bool:
         has_min = False
         has_max = False
+        has_approx = False
         changed = False
 
         new_specs = []
 
+        is_this_wpilib_package = pypi_name in self.wpilib_packages
+        is_req_wpilib_package = req.name in self.wpilib_packages
+        is_wpilib_on_wpilib = is_req_wpilib_package and is_this_wpilib_package
+
+        my_version = self.versions[pypi_name]
+
         for spec in req.specifier:
             version = Version(spec.version)
             if spec.operator == ">=":
-                # min version
-                if version < min_version:
+                # min version -- no longer used for wpilib packages depending
+                # on wpilib packages
+                if is_wpilib_on_wpilib:
                     changed = True
-                    commit_changes.add(f"{req.name} >= {min_version}")
-                    new_specs.append(f">={min_version}")
+                else:
+                    if version < min_version:
+                        changed = True
+                        commit_changes.add(f"{req.name} >= {min_version}")
+                        new_specs.append(f">={min_version}")
+                    else:
+                        new_specs.append(str(spec))
+
+                    has_min = True
+            elif spec.operator == "<":
+                # max version -- no longer used for wpilib packages depending
+                # on wpilib packages
+                if is_wpilib_on_wpilib:
+                    changed = True
+                else:
+                    if version != self.max_version:
+                        raise ValueError(
+                            f"{req}: max_version ({version}) != {self.max_version}"
+                        )
+
+                    new_specs.append(str(spec))
+                    has_max = True
+            elif spec.operator == "~=":
+                # approximate version -- only changed for wpilib packages
+                # depending on wpilib packages
+                if is_wpilib_on_wpilib and spec.version != self.wpilib_approx:
+                    commit_changes.add(f"{req.name} ~= {self.wpilib_approx}")
+                    new_specs.append(f"~={self.wpilib_approx}")
+                    changed = True
                 else:
                     new_specs.append(str(spec))
-
-                has_min = True
-            elif spec.operator == "<":
-                # max version
-                if version != self.max_version:
-                    raise ValueError(
-                        f"{req}: max_version ({version}) != {self.max_version}"
-                    )
-
-                new_specs.append(str(spec))
-                has_max = True
+                has_approx = True
             else:
                 new_specs.append(str(spec))
 
-        if not has_min or not has_max:
-            raise ValueError(
-                f"invalid requirement {req} (has_min={has_min}, has_max={has_max}"
-            )
+        if is_wpilib_on_wpilib and not has_approx:
+            commit_changes.add(f"{req.name} ~= {self.wpilib_approx}")
+            new_specs.append(f"~={self.wpilib_approx}")
+            changed = True
+
+        if not is_wpilib_on_wpilib:
+            if not has_min or not has_max:
+                raise ValueError(
+                    f"invalid requirement {req} (has_min={has_min}, has_max={has_max} has_approx={has_approx}"
+                )
 
         if changed:
             old_req = str(req)
@@ -96,7 +160,11 @@ class ProjectUpdater:
         return False
 
     def _update_requirements(
-        self, what: str, commit_changes: typing.Set[str], reqs: typing.List[str]
+        self,
+        pypi_name: str,
+        what: str,
+        commit_changes: typing.Set[str],
+        reqs: typing.List[str],
     ) -> bool:
         requires = list(reqs)
         changes = []
@@ -106,7 +174,7 @@ class ProjectUpdater:
             # then change it
             if req.name in self.min_versions:
                 if self._update_req_version(
-                    commit_changes, changes, req, self.min_versions[req.name]
+                    pypi_name, commit_changes, changes, req, self.min_versions[req.name]
                 ):
                     reqs[i] = str(req)
 
@@ -134,11 +202,15 @@ class ProjectUpdater:
 
         # update build-system
         self._update_requirements(
-            "build-system.requires", commit_changes, data["build-system"]["requires"]
+            pypi_name,
+            "build-system.requires",
+            commit_changes,
+            data["build-system"]["requires"],
         )
 
         # update tool.robotpy-build.metadata: install_requires
         self._update_requirements(
+            pypi_name,
             "metadata.install_requires",
             commit_changes,
             data["tool"]["robotpy-build"]["metadata"]["install_requires"],
