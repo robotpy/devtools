@@ -259,6 +259,8 @@ def autopush(mud: MassUpdateData, doit: bool, until: typing.Optional[str]):
     next repo.
     """
 
+    start = time.monotonic()
+
     toexec: typing.List[IterMeta] = []
 
     # sanity checks first
@@ -324,6 +326,9 @@ def autopush(mud: MassUpdateData, doit: bool, until: typing.Optional[str]):
         ok, _, _ = does_pypi_release_exist(meta.name, meta.desired_version)
         if not ok:
             wait_for_pypi_version(meta.name, meta.desired_version)
+
+    elapsed = time.monotonic() - start
+    print("Finished in", elapsed, "seconds")
 
 
 @main.command()
