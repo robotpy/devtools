@@ -19,6 +19,9 @@ class Parameters(Model):
     wpilib_packages: typing.List[str]
     vendor_packages: typing.List[str]
 
+    # robotpy-meta project
+    meta_package: str
+
     #: list of repos that we are managing
     repos: typing.List[str]
 

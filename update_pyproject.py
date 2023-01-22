@@ -51,14 +51,15 @@ class ProjectUpdater:
         self.versions = {}
         for n, v in self.cfg.versions.items():
             v = Version(v)
-            # New assumption: all wpilib packages are working on the same approx version
-            approx = self._compute_wpilib_approx_version(v)
-            if self.wpilib_approx == "":
-                self.wpilib_approx = approx
-            elif approx != self.wpilib_approx:
-                raise ValueError(
-                    f"wpilib package approx version mismatch: {approx} vs {self.wpilib_approx}"
-                )
+            if n in self.wpilib_packages:
+                # New assumption: all wpilib packages are working on the same approx version
+                approx = self._compute_wpilib_approx_version(v)
+                if self.wpilib_approx == "":
+                    self.wpilib_approx = approx
+                elif approx != self.wpilib_approx:
+                    raise ValueError(
+                        f"wpilib package approx version mismatch: {approx} vs {self.wpilib_approx}"
+                    )
 
             self.versions[n] = v
 
@@ -270,7 +271,84 @@ class ProjectUpdater:
                 msg = "Updated dependencies\n\n"
                 msg += "- " + "\n- ".join(sorted(commit_changes))
 
-                repo.commit(path.name, msg)
+                repo.commit(msg, path.name)
+
+        return True
+
+    def update_robotpy_meta(self, path: pathlib.Path):
+
+        commit_files: typing.Dict[pathlib.Path, typing.List[str]] = {}
+        commit_changes: typing.Set[str] = set()
+
+        if self.dry_run:
+            print(f"Checking robotpy-meta ({path})")
+        else:
+            print(f"Updating robotpy-meta ({path})")
+
+        # for every requirements.txt, check it for updates
+        # if an update is found, add to the list of changes
+
+        req_files = [path / "requirements.txt"] + list(path.glob("*-requirements.txt"))
+        for req_fname in req_files:
+            with open(req_fname, "r") as file:
+                file_data = file.readlines()
+
+            for lineno in range(len(file_data)):
+                line = file_data[lineno].strip("\r\n\t ")
+                if not line or line.startswith("#"):
+                    continue
+
+                try:
+                    req = Requirement(line)
+                except Exception as e:
+                    raise ValueError(f"Error parsing {req_fname}:{lineno+1}") from e
+
+                # Only update things in wpilib_packages
+                if req.name not in self.wpilib_packages:
+                    continue
+
+                new_version = self.versions[req.name]
+                update = False
+
+                specs = list(req.specifier)
+                if len(specs) != 1 or specs[0].operator != "==":
+                    update = True
+                else:
+                    v = Version(specs[0].version)
+                    if v != new_version:
+                        update = True
+
+                if update:
+                    commit_changes.add(f"{req.name} == {new_version}")
+                    req.specifier = SpecifierSet(f"=={new_version}")
+                    file_data[lineno] = f"{req}\n"
+                    commit_files[req_fname] = file_data
+
+        if commit_changes:
+            for change in sorted(commit_changes):
+                print(f"*", change)
+        else:
+            print("* no changes needed")
+            return False
+
+        if not self.dry_run:
+            repo = GitRepo(path)
+            if self.git_commit:
+                if repo.is_file_dirty(path.name):
+                    raise ValueError(f"{path} has outstanding edits, refusing to write")
+
+            to_commit = []
+            for fname, content in commit_files.items():
+                with open(fname, "w") as fp:
+                    fp.write("".join(content))
+
+                to_commit.append(fname.name)
+
+            if self.git_commit:
+                msg = "Updated dependencies\n\n"
+                msg += "- " + "\n- ".join(sorted(commit_changes))
+
+                repo.commit(msg, *to_commit)
 
         return True
 

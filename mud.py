@@ -57,10 +57,20 @@ class MassUpdateData:
             yield IterMeta(repo, name, actual_version, desired_version)
 
     def get_repo_pypi_name(self, repo: githelp.GitRepo) -> str:
-        with open(repo.path / "pyproject.toml") as fp:
-            data = tomlkit.parse(fp.read())
+        pyproject_toml = repo.path / "pyproject.toml"
+        if pyproject_toml.exists():
+            with open(pyproject_toml) as fp:
+                data = tomlkit.parse(fp.read())
 
-        return data["tool"]["robotpy-build"]["metadata"]["name"]
+            return data["tool"]["robotpy-build"]["metadata"]["name"]
+
+        setup_py = repo.path / "setup.py"
+        if setup_py.exists():
+            return subprocess.check_output(
+                [sys.executable, "setup.py", "--name"], text=True, cwd=repo.path
+            ).strip()
+
+        raise ValueError(f"cannot get pypi name for {repo.path}")
 
 
 @click.group()
@@ -128,31 +138,44 @@ def git(mud: MassUpdateData, args):
 
 
 @main.group()
-def pyproject():
-    """pyproject.toml management"""
+def project():
+    """project management"""
     pass
 
 
-@pyproject.command()
+@project.command()
 @click.option("--commit", is_flag=True, default=False)
 @click.option("--until", default=None)
 @click.pass_obj
 def update(mud: MassUpdateData, commit: bool, until: typing.Optional[str]):
-    """Updates pyproject.toml from the configuration"""
+    """Updates project's dependencies and such from cfg.toml"""
     if not commit:
         mud.pyupdater.dry_run = True
     else:
         mud.pyupdater.dry_run = False
         mud.pyupdater.git_commit = True
 
+    to_update = 0
+
     for repo in mud.repo_dirs():
         if repo.path.name == until:
             break
-        mud.pyupdater.update_pyproject_toml(repo.path / "pyproject.toml")
+
+        if repo.path.name == mud.cfg.params.meta_package:
+            if mud.pyupdater.update_robotpy_meta(repo.path):
+                to_update += 1
+        else:
+            if mud.pyupdater.update_pyproject_toml(repo.path / "pyproject.toml"):
+                to_update += 1
         print()
 
+    if commit:
+        print(to_update, "repos updated")
+    else:
+        print(to_update, "repos to update")
 
-@pyproject.command()
+
+@project.command()
 @click.argument("project")
 @click.pass_obj
 def reset_origin(mud: MassUpdateData, project: str):
@@ -161,7 +184,7 @@ def reset_origin(mud: MassUpdateData, project: str):
             meta.repo.reset_origin("main")
 
 
-@pyproject.command()
+@project.command()
 @click.option("--doit", is_flag=True, default=False)
 @click.pass_obj
 def updatecfg(mud: MassUpdateData, doit: bool):

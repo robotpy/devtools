@@ -1,4 +1,6 @@
+black
 click
 packaging
+pydantic
 requests
 tomlkit

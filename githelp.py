@@ -13,9 +13,10 @@ class GitRepo:
             cwd=self.path,
         )
 
-    def commit(self, relpath: str, msg: str):
+    def commit(self, msg: str, *relpath: str):
+        print("self.path", self.path)
         subprocess.run(
-            ["git", "commit", "-F", "-", relpath],
+            ["git", "commit", "-F", "-", "--"] + list(relpath),
             check=True,
             cwd=self.path,
             input=msg,
