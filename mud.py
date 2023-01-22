@@ -34,6 +34,7 @@ class IterMeta(typing.NamedTuple):
     name: str
     actual_version: str
     desired_version: str
+    pypi_needed: int
 
 
 class MassUpdateData:
@@ -54,7 +55,13 @@ class MassUpdateData:
             actual_version = repo.get_last_tag()
             name = self.get_repo_pypi_name(repo)
             desired_version = self.cfg.versions[name]
-            yield IterMeta(repo, name, actual_version, desired_version)
+
+            if name in self.cfg.params.pure_packages:
+                pypi_needed = 2
+            else:
+                pypi_needed = 15
+
+            yield IterMeta(repo, name, actual_version, desired_version, pypi_needed)
 
     def get_repo_pypi_name(self, repo: githelp.GitRepo) -> str:
         pyproject_toml = repo.path / "pyproject.toml"
@@ -236,7 +243,7 @@ def updatecfg(mud: MassUpdateData, doit: bool):
 # TODO: sanity check versions against set-version
 
 
-def does_pypi_release_exist(pkgname: str, version: str):
+def does_pypi_release_exist(pkgname: str, version: str, count: int):
     url = f"https://pypi.org/pypi/{pkgname}/{version}/json"
     # req = requests.head(url)
     req = requests.get(url)
@@ -245,17 +252,17 @@ def does_pypi_release_exist(pkgname: str, version: str):
 
     data = req.json()
     release_count = len(data["urls"])
-    return release_count >= 15, req.status_code, release_count
+    return release_count >= count, req.status_code, release_count
 
 
-def wait_for_pypi_version(pkgname: str, version: str):
+def wait_for_pypi_version(pkgname: str, version: str, count: int):
     url = f"https://pypi.org/pypi/{pkgname}/{version}/json"
     sleeptime = 90
 
     while True:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{now}: checking {url}...")
-        ok, status_code, releases = does_pypi_release_exist(pkgname, version)
+        ok, status_code, releases = does_pypi_release_exist(pkgname, version, count)
         if releases:
             print(f"... {status_code} ({releases} releases)")
         else:
@@ -292,7 +299,9 @@ def autopush(mud: MassUpdateData, doit: bool, until: typing.Optional[str]):
             break
 
         if meta.actual_version == meta.desired_version:
-            ok, _, _ = does_pypi_release_exist(meta.name, meta.desired_version)
+            ok, _, _ = does_pypi_release_exist(
+                meta.name, meta.desired_version, meta.pypi_needed
+            )
             if ok:
                 continue
 
@@ -346,9 +355,11 @@ def autopush(mud: MassUpdateData, doit: bool, until: typing.Optional[str]):
         meta.repo.push()
         meta.repo.push_tag(meta.desired_version)
 
-        ok, _, _ = does_pypi_release_exist(meta.name, meta.desired_version)
+        ok, _, _ = does_pypi_release_exist(
+            meta.name, meta.desired_version, meta.pypi_needed
+        )
         if not ok:
-            wait_for_pypi_version(meta.name, meta.desired_version)
+            wait_for_pypi_version(meta.name, meta.desired_version, meta.pypi_needed)
 
     elapsed = time.monotonic() - start
     print("Finished in", elapsed, "seconds")

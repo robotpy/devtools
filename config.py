@@ -22,6 +22,8 @@ class Parameters(Model):
     # robotpy-meta project
     meta_package: str
 
+    pure_packages: typing.List[str]
+
     #: list of repos that we are managing
     repos: typing.List[str]
 

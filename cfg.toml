@@ -50,6 +50,8 @@ robotpy = "2023.2.1.2"
 [params]
 max_version = "2024.0.0" # only used for non-wpilib packages
 
+pure_packages = ["robotpy"]
+
 wpilib_packages = [
   "robotpy-wpiutil",
   "robotpy-wpinet",
