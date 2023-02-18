@@ -202,7 +202,7 @@ def updatecfg(mud: MassUpdateData, doit: bool):
     changed = False
     rawcfg = mud.rawcfg
 
-    for (repo, name, actual_version, desired_version) in mud.iter_repos_meta():
+    for (_, name, actual_version, desired_version, _) in mud.iter_repos_meta():
         if actual_version != desired_version:
             print(f"{name:20}: {desired_version} -> {actual_version}")
             rawcfg["versions"][name] = actual_version
@@ -219,6 +219,17 @@ def updatecfg(mud: MassUpdateData, doit: bool):
 
         # print(new)
         # # print_diff(mud.cfgpath, orig, new)
+
+
+@project.command()
+@click.pass_obj
+def buildall(mud: MassUpdateData):
+    for meta in mud.iter_repos_meta():
+        subprocess.run(
+            [sys.executable, "setup.py", "develop", "-N"],
+            cwd=meta.repo.path,
+            check=True,
+        )
 
 
 # select the package set we're going to update
