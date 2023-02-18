@@ -1,5 +1,5 @@
 [min_versions]
-robotpy-build = "2023.0.1"
+robotpy-build = "2023.1.1"
 
 # robotpy-wpiutil             = "actual"
 # robotpy-wpinet              = "actual"
@@ -11,18 +11,18 @@ robotpy-build = "2023.0.1"
 # robotpy-halsim-ds-socket    = "actual"
 # robotpy-halsim-ws           = "actual"
 
-pyntcore = "2023.2.1.2"
-robotpy-apriltag = "2023.2.1.1"
-robotpy-commands-v2 = "2023.2.1.1"
-robotpy-cscore = "2023.2.1.1"
-robotpy-hal = "2023.2.1.1"
-robotpy-halsim-ds-socket = "2023.2.1.1"
-robotpy-halsim-gui = "2023.2.1.1"
-robotpy-halsim-ws = "2023.2.1.1"
-robotpy-wpimath = "2023.2.1.1"
-robotpy-wpinet = "2023.2.1.1"
-robotpy-wpiutil = "2023.2.1.1"
-wpilib = "2023.2.1.1"
+pyntcore = "2023.4.1.0"
+robotpy-apriltag = "2023.4.1.0"
+robotpy-commands-v2 = "2023.4.1.0"
+robotpy-cscore = "2023.4.1.0"
+robotpy-hal = "2023.4.1.0"
+robotpy-halsim-ds-socket = "2023.4.1.0"
+robotpy-halsim-gui = "2023.4.1.0"
+robotpy-halsim-ws = "2023.4.1.0"
+robotpy-wpimath = "2023.4.1.0"
+robotpy-wpinet = "2023.4.1.0"
+robotpy-wpiutil = "2023.4.1.0"
+wpilib = "2023.4.1.0"
 
 [versions]
 
@@ -30,21 +30,21 @@ wpilib = "2023.2.1.1"
 # - x is the upstream version
 # - y are specific robotpy patches when we release out of band
 
-pyntcore = "2023.2.1.2"
-robotpy-apriltag = "2023.2.1.1"
-robotpy-commands-v2 = "2023.2.1.1"
-robotpy-cscore = "2023.2.1.1"
-robotpy-hal = "2023.2.1.1"
-robotpy-halsim-ds-socket = "2023.2.1.1"
-robotpy-halsim-gui = "2023.2.1.1"
-robotpy-halsim-ws = "2023.2.1.1"
-robotpy-wpimath = "2023.2.1.1"
-robotpy-wpinet = "2023.2.1.1"
-robotpy-wpiutil = "2023.2.1.1"
-wpilib = "2023.2.1.1"
+pyntcore = "2023.4.1.1"
+robotpy-apriltag = "2023.4.1.0"
+robotpy-commands-v2 = "2023.4.1.0"
+robotpy-cscore = "2023.3.2.1"
+robotpy-hal = "2023.4.1.0"
+robotpy-halsim-ds-socket = "2023.4.1.0"
+robotpy-halsim-gui = "2023.4.1.0"
+robotpy-halsim-ws = "2023.4.1.0"
+robotpy-wpimath = "2023.4.1.0"
+robotpy-wpinet = "2023.4.1.0"
+robotpy-wpiutil = "2023.4.1.0"
+wpilib = "2023.4.1.0"
 
 
-robotpy = "2023.2.1.2"
+robotpy = "2023.4.1"
 
 
 [params]
@@ -68,7 +68,7 @@ wpilib_packages = [
 ]
 
 wpilib_bin_url = "https://frcmaven.wpi.edu/artifactory/release"
-wpilib_bin_version = "2023.2.1"
+wpilib_bin_version = "2023.4.1"
 # wpilib_bin_url = "https://frcmaven.wpi.edu/artifactory/development"
 
 vendor_packages = []
