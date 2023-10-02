@@ -187,7 +187,7 @@ def update(mud: MassUpdateData, commit: bool, until: typing.Optional[str]):
 @click.pass_obj
 def reset_origin(mud: MassUpdateData, project: str):
     for meta in mud.iter_repos_meta():
-        if meta.name == project:
+        if meta.name == project or project == "all":
             meta.repo.reset_origin("main")
 
 
@@ -227,6 +227,17 @@ def buildall(mud: MassUpdateData):
     for meta in mud.iter_repos_meta():
         subprocess.run(
             [sys.executable, "setup.py", "develop", "-N"],
+            cwd=meta.repo.path,
+            check=True,
+        )
+
+
+@project.command()
+@click.pass_obj
+def testall(mud: MassUpdateData):
+    for meta in mud.iter_repos_meta():
+        subprocess.run(
+            [sys.executable, str(pathlib.Path("tests", "run_tests.py"))],
             cwd=meta.repo.path,
             check=True,
         )
