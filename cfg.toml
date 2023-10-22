@@ -66,7 +66,7 @@ wpilib_packages = [
 ]
 
 wpilib_bin_url = "https://frcmaven.wpi.edu/artifactory/release"
-wpilib_bin_version = "2023.4.3"
+wpilib_bin_version = "2024.1.1-beta-2"
 # wpilib_bin_url = "https://frcmaven.wpi.edu/artifactory/development"
 
 vendor_packages = []
